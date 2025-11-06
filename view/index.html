@@ -1,233 +1,379 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hui-Lin Wu | Android Developer</title>
-  <style>
-    /* ====== 全域樣式 ====== */
-    body {
-      font-family: "Noto Sans TC", sans-serif;
-      background: #fffaf5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      color: #333;
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Hui-Lin Wu | Android Developer</title>
+    <style>
+        /* ====== 全域樣式 ====== */
+        body {
+          font-family: "Noto Sans TC", sans-serif;
+          background: #f5f5f5;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 100vh;
+          color: #333;
+        }
+
+        .container {
+          background: #ffffff;
+          margin: 40px 0;
+          border-radius: 20px;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          width: 90%;
+          max-width: 900px;
+          overflow: hidden;
+          animation: fadeInUp 1s ease;
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        /* ====== 頂部個人區 ====== */
+        .profile {
+          text-align: center;
+          padding: 40px 20px;
+          background: linear-gradient(135deg, #e0e0e0, #cfcfcf);
+          border-bottom: 3px solid #bdbdbd;
+        }
+
+        .profile img {
+          width: 150px;
+          height: 150px;
+          border-radius: 50%;
+          border: 4px solid #fff;
+          object-fit: cover;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .profile h1 {
+          margin: 0;
+          font-size: 28px;
+          color: #424242;
+        }
+
+        .profile h1 span {
+          font-size: 16px;
+          color: #757575;
+          display: block;
+        }
+
+        .profile h2 {
+          color: #616161;
+          font-weight: normal;
+          margin-top: 10px;
+        }
+
+        .profile .buttons {
+          margin-top: 20px;
+        }
+
+        .profile .buttons a {
+          text-decoration: none;
+          background: #9e9e9e;
+          color: white;
+          padding: 10px 20px;
+          margin: 0 8px;
+          border-radius: 25px;
+          font-weight: normally;
+          transition: background 0.3s, transform 0.2s;
+          display: inline-block;
+        }
+
+        .profile .buttons a:hover {
+          background: #757575;
+          transform: scale(1.05);
+        }
+
+        /* ====== 內容區 ====== */
+        .content {
+          padding: 40px 30px;
+        }
+
+        h2 {
+          color: #424242;
+          border-left: 6px solid #9e9e9e;
+          padding-left: 10px;
+          margin-bottom: 10px;
+        }
+
+        ul {
+          list-style: none;
+          padding-left: 20px;
+        }
+
+        ul li::before {
+          content: "•";
+          color: #9e9e9e;
+          display: inline-block;
+          width: 1em;
+          margin-left: -1em;
+        }
+
+        /* ====== 工作經歷 (折疊) ====== */
+        details {
+          background: #f2f2f2;
+          border-radius: 12px;
+          padding: 15px 20px;
+          margin-bottom: 15px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+          transition: all 0.3s ease;
+        }
+
+        details summary {
+          font-weight: bold;
+          cursor: pointer;
+          color: #424242;
+        }
+
+        details[open] {
+          background: #e0e0e0;
+          transform: scale(1.02);
+        }
+
+        details p, details ul {
+          margin-top: 10px;
+          color: #555;
+        }
+
+        /* ====== Footer ====== */
+        footer {
+          text-align: center;
+          padding: 20px;
+          font-size: 14px;
+          color: #757575;
+        }
+        /* ====== 接案卡片動畫區 ====== */
+    .project-card {
+      width: 100%;
+      max-width: 600px;
+      margin: 30px auto;
+      perspective: 1000px;
     }
 
-    .container {
-      background: #fff;
-      margin: 40px 0;
-      border-radius: 20px;
-      box-shadow: 0 10px 20px rgba(255, 153, 51, 0.2);
-      width: 90%;
-      max-width: 900px;
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 350px;
+      transition: transform 0.8s;
+      transform-style: preserve-3d;
+      cursor: pointer;
+    }
+
+    .project-card:hover .card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
       overflow: hidden;
-      animation: fadeInUp 1s ease;
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    /* 前面樣式 */
+    .card-front {
+      background: #f2f2f2;
+      color: #424242;
+      padding: 25px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
-    /* ====== 頂部個人區 ====== */
-    .profile {
-      text-align: center;
-      padding: 40px 20px;
-      background: linear-gradient(135deg, #ffe0b2, #ffd180);
-      border-bottom: 3px solid #ffb74d;
-    }
-
-    .profile img {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      border: 4px solid #fff;
-      object-fit: cover;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-
-    .profile h1 {
-      margin: 0;
-      font-size: 28px;
-      color: #5d4037;
-    }
-
-    .profile h1 span {
-      font-size: 16px;
-      color: #8d6e63;
-      display: block;
-    }
-
-    .profile h2 {
-      color: #795548;
-      font-weight: normal;
-      margin-top: 10px;
-    }
-
-    .profile .buttons {
-      margin-top: 20px;
-    }
-
-    .profile .buttons a {
-      text-decoration: none;
-      background: #ffb74d;
-      color: white;
-      padding: 10px 20px;
-      margin: 0 8px;
-      border-radius: 25px;
-      font-weight: bold;
-      transition: background 0.3s, transform 0.2s;
-      display: inline-block;
-    }
-
-    .profile .buttons a:hover {
-      background: #ff9800;
-      transform: scale(1.05);
-    }
-
-    /* ====== 內容區 ====== */
-    .content {
-      padding: 40px 30px;
-    }
-
-    h2 {
-      color: #6d4c41;
-      border-left: 6px solid #ffb74d;
+    .card-front h3 {
+      margin-top: 0;
+      color: #424242;
+      border-left: 6px solid #9e9e9e;
       padding-left: 10px;
-      margin-bottom: 10px;
     }
 
-    ul {
-      list-style: none;
+    .card-front ul {
       padding-left: 20px;
+      list-style: none;
     }
 
-    ul li::before {
+    .card-front ul li::before {
       content: "•";
-      color: #ffb74d;
+      color: #9e9e9e;
       display: inline-block;
       width: 1em;
       margin-left: -1em;
     }
 
-    /* ====== 工作經歷 (折疊) ====== */
-    details {
-      background: #fff8e1;
-      border-radius: 12px;
-      padding: 15px 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 6px rgba(255, 171, 64, 0.2);
-      transition: all 0.3s ease;
-    }
-
-    details summary {
-      font-weight: bold;
-      cursor: pointer;
-      color: #6d4c41;
-    }
-
-    details[open] {
-      background: #ffecb3;
-      transform: scale(1.02);
-    }
-
-    details p, details ul {
+    .card-front .hint {
       margin-top: 10px;
-      color: #5d4037;
+      font-size: 13px;
+      color: #757575;
+      text-align: center;
     }
 
-    /* ====== Footer ====== */
-    footer {
-      text-align: center;
-      padding: 20px;
-      font-size: 14px;
-      color: #8d6e63;
+    /* 背面樣式 */
+    .card-back {
+      background: #e0e0e0;
+      color: #333;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-  </style>
+
+    .card-back img {
+      width: 80%;
+      height: auto;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      margin-bottom: 15px;
+    }
+
+    .card-back p {
+      color: #424242;
+      font-weight: bold;
+    }
+    .card-back video {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    };
+
+
+    </style>
 </head>
 
 <body>
 <div class="container">
 
-  <!-- 頭像區 -->
-  <section class="profile">
-    <img src="your-photo.jpg" alt="Hui-Lin Wu" />
-    <h1>Hui-Lin Wu <span>(吳慧琳)</span></h1>
-    <h2>Android Developer</h2>
+    <!-- 頭像區 -->
+    <section class="profile">
+        <img src="assets/linkedin-profile.jpg" alt="Hui-Lin Wu"/>
+        <h1>Hui-Lin Wu <span>(吳慧琳)</span></h1>
+        <h2>Android / Flutter Developer</h2>
 
-    <div class="buttons">
-      <a href="https://tw.linkedin.com/in/%E6%85%A7%E7%90%B3-%E5%90%B3-971058240" target="_blank">LinkedIn</a>
-      <a href="https://github.com/wuxuw0830" target="_blank">GitHub</a>
-    </div>
-  </section>
+        <div class="buttons">
+            <a href="https://tw.linkedin.com/in/%E6%85%A7%E7%90%B3-%E5%90%B3-971058240"
+               target="_blank">LinkedIn</a>
+            <a href="https://github.com/wuxuw0830" target="_blank">GitHub</a>
+            <a href="https://medium.com/@wuxuw08302" target="_blank">Medium</a>
+        </div>
+    </section>
 
-  <!-- 內容 -->
-  <section class="content">
+    <!-- 內容 -->
+    <section class="content">
 
-    <h2>Summary of Qualifications</h2>
-    <ul>
-      <li>3+年 Android 軟體實務開發經驗</li>
-      <li>熟悉 Java、Kotlin、C# 語言</li>
-      <li>良好的溝通與傾聽技能</li>
-      <li>可獨立或團隊合作開發</li>
-      <li>具自我學習與挑戰精神</li>
-    </ul>
+        <h2>Summary of Qualifications</h2>
+        <ul>
+            <li>4+年 Android 軟體實務開發經驗</li>
+            <li>熟悉 Java、Kotlin、C# 語言</li>
+            <li>良好的溝通與傾聽技能</li>
+            <li>可獨立或團隊合作開發</li>
+            <li>具自我學習與挑戰精神</li>
+        </ul>
 
-    <h2>Work Experience</h2>
+        <h2>Work Experience</h2>
 
-    <details>
-      <summary>台灣人壽 — 資訊開發工程師 (2024.08 - 2024.10)</summary>
-      <p>Fortify弱掃修正、Google Fit 改 Health Connect、問題排查與開發規劃。</p>
-      <ul>
-        <li>保戶App：Google Fit 改 Health Connect（MVVM + Jetpack Compose）</li>
-        <li>Team Walk App：SDK升級（MVP）</li>
-      </ul>
-    </details>
+        <details>
+            <summary>Bitstreetx Co.,LTD — Mobile engineer (2024.12 - Present)</summary>
+            <p>開發及維護 Flutter App 產品</p>
+            <ul>
+                <li>SonarQube 整合 Flutter 專案中，進行分析，提升程式碼品質與可維護性。</li>
+                <li>協助建立阿里巴巴日誌服務 (SSL)，結合至App分析用戶行為，優化體驗。</li>
+                <li>WebSocket重構，解決連線多工，並優化架構。</li>
+                <li>SVG utils，有效解決 flutter_svg 套件的兼容性與顯示問題。</li>
+            </ul>
+        </details>
 
-    <details>
-      <summary>昕力資訊 — Android Developer (2022.04 - 2024.07)</summary>
-      <p>負責銀行與保險 App 之開發與維護，使用 Jetpack Compose / Hilt / Coroutine 技術。</p>
-      <ul>
-        <li>他行柬埔寨網銀開發</li>
-        <li>他行投信App / 樂齡版App / 強制險2.0</li>
-        <li>Fido UAF SDK、SoftToken SDK整合</li>
-      </ul>
-    </details>
+        <details>
+            <summary>台灣人壽 — 資訊開發工程師 (2024.08 - 2024.10)</summary>
+            <p>Fortify弱掃修正、Google Fit 改 Health Connect、問題排查與開發規劃。</p>
+            <ul>
+                <li>保戶App：Google Fit 改 Health Connect（MVVM + Jetpack Compose）</li>
+                <li>Team Walk App：SDK升級（MVP）</li>
+            </ul>
+        </details>
 
-    <details>
-      <summary>依德科技股份有限公司 — Android Developer (2021.06 - 2022.03)</summary>
-      <p>負責多款健康與商城App開發，使用MVC/MVP/MVVM架構。</p>
-      <ul>
-        <li>全球遠距投保App（WebRTC、OCR、SSL Pinning）</li>
-        <li>依和健康商城App（BLE、Line Pay、Retrofit）</li>
-        <li>數體健App（BLE、CameraX、QrCode）</li>
-      </ul>
-    </details>
+        <details>
+            <summary>昕力資訊 — Android Developer (2022.04 - 2024.07)</summary>
+            <p>負責銀行與保險 App 之開發與維護，使用 Jetpack Compose / Hilt / Coroutine 技術。</p>
+            <ul>
+                <li>他行柬埔寨網銀開發</li>
+                <li>他行投信App / 樂齡版App / 強制險2.0</li>
+                <li>Fido UAF SDK、SoftToken SDK整合</li>
+            </ul>
+        </details>
 
-    <h2>Side Project</h2>
-    <p><strong>YuKaBu App — 旅遊交友App</strong></p>
-    <ul>
-      <li>Post頁面、Course Detail頁面、FCM Service</li>
-      <li>MVVM、Jetpack Compose、RxJava、Koin、ViewBinding</li>
-    </ul>
+        <details>
+            <summary>依德科技股份有限公司 — Android Developer (2021.06 - 2022.03)</summary>
+            <p>負責多款健康與商城App開發，使用MVC/MVP/MVVM架構。</p>
+            <ul>
+                <li>全球遠距投保App（WebRTC、OCR、SSL Pinning）</li>
+                <li>依和健康商城App（BLE、Line Pay、Retrofit）</li>
+                <li>數體健App（BLE、CameraX、QrCode）</li>
+            </ul>
+        </details>
 
-  </section>
+        <h2>Side Project</h2>
+        <p><strong>YuKaBu App — 旅遊交友App</strong></p>
+        <ul>
+            <li>Post頁面、Course Detail頁面、FCM Service</li>
+            <li>MVVM、Jetpack Compose、RxJava、Koin、ViewBinding</li>
+        </ul>
 
-  <footer>
-    © 2025 Hui-Lin Wu. All rights reserved.
-  </footer>
+        <h2>接案作品</h2>
+
+        <div class="project-card">
+            <div class="card-inner">
+                <!-- 前面：專案介紹 -->
+                <div class="card-front">
+                    <h3>Vkool iKoo App</h3>
+                    <ul>
+                        <li>協助建立 Firestore 整合網頁實現輕量化後端功能</li>
+                        <li>整合 Firebase / GitHub 帳號功能</li>
+                        <li>建立上傳網頁、Custom View 處理隔熱貼效果</li>
+                        <li>FireStore + SignInAnonymously</li>
+                        <li>輪播與自動睡眠功能</li>
+                        <li>MVVM、ViewBinding、FireStore、FirebaseAuth</li>
+                    </ul>
+                    <p class="hint">👉 點擊卡片查看成果影片</p>
+                </div>
+
+                <!-- 背面：成果影片 -->
+                <div class="card-back">
+                    <video
+                            src="assets/video/ikoolDemo.mp4"
+                            controls
+                            autoplay
+                            loop
+                            muted
+                            playsinline
+                    ></video>
+                    <p>Vkool iKoo App — 作品影片預覽</p>
+                </div>
+            </div>
+        </div>
+
+
+    </section>
+
+    <footer>
+        © 2025 Hui-Lin Wu. All rights reserved.
+    </footer>
 </div>
 </body>
 </html>
