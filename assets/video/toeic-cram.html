@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEIC 5 天衝刺 — Cram Mode</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #0f172a;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 16px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  button { font-family: inherit; }
+  .container { max-width: 760px; margin: 0 auto; }
+
+  header.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+  h1 {
+    font-size: 22px;
+    background: linear-gradient(90deg, #60a5fa, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .top-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #94a3b8;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .icon-btn:hover { background: #1e293b; color: #e2e8f0; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .mode-tab {
+    padding: 10px 14px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #cbd5e1;
+    font-size: 13px;
+    min-height: 44px;
+    flex: 1 1 auto;
+    transition: background 0.15s, color 0.15s;
+  }
+  .mode-tab:hover { background: #334155; }
+  .mode-tab.active {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-color: transparent;
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Box status strip */
+  .box-status {
+    display: flex;
+    gap: 8px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    align-items: center;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+  .pill {
+    background: #0f172a;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+  }
+  .pill.new    { border-color: #475569; }
+  .pill.almost { border-color: #f59e0b; color: #fbbf24; }
+  .pill.known  { border-color: #10b981; color: #6ee7b7; }
+  .pill .label { color: #64748b; margin-right: 4px; font-size: 11px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* Generic card */
+  .panel-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    padding: 20px;
+  }
+
+  /* Mode header (progress + timer line) */
+  .mode-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .mode-head .timer { font-variant-numeric: tabular-nums; color: #cbd5e1; }
+  .progress-track {
+    height: 6px;
+    background: #334155;
+    border-radius: 3px;
+    overflow: hidden;
+    flex: 1;
+    margin: 0 12px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    transition: width 0.3s;
+    width: 0%;
+  }
+
+  /* ==== Today ==== */
+  .today-idle, .today-summary {
+    text-align: center;
+    padding: 20px 8px;
+  }
+  .today-idle .big-cta {
+    display: inline-block;
+    padding: 18px 36px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border: none;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 18px;
+    min-height: 56px;
+  }
+  .today-idle .last-line { color: #94a3b8; font-size: 13px; margin-top: 14px; }
+  .stage-badge {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #0f172a;
+    border: 1px solid #334155;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+  .stage-badge .stage-name { font-weight: 600; color: #60a5fa; }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .summary-cell {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+  .summary-cell .num { font-size: 24px; font-weight: 700; color: #60a5fa; }
+  .summary-cell .lbl { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+
+  /* ==== Match ==== */
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .match-col { display: flex; flex-direction: column; gap: 8px; }
+  .match-tile {
+    padding: 14px 12px;
+    background: #0f172a;
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 15px;
+    cursor: pointer;
+    min-height: 52px;
+    text-align: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s, opacity 0.25s;
+  }
+  .match-tile:hover { background: #1e293b; }
+  .match-tile.selected {
+    border-color: #60a5fa;
+    background: rgba(96, 165, 250, 0.12);
+  }
+  .match-tile.matched {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.85);
+  }
+  .match-tile.shake {
+    animation: shake 0.3s;
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.18);
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* ==== MC ==== */
+  .mc-stem {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 28px 16px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .mc-word { font-size: 38px; font-weight: 700; color: #f1f5f9; }
+  .mc-pos  { color: #fbbf24; font-size: 14px; margin-top: 4px; }
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .mc-opt {
+    background: #0f172a;
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    padding: 16px 12px;
+    color: #e2e8f0;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 60px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .mc-opt:hover { background: #1e293b; }
+  .mc-num {
+    background: #334155;
+    color: #94a3b8;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .mc-opt.correct { background: #065f46; border-color: #10b981; color: white; }
+  .mc-opt.wrong   { background: #7f1d1d; border-color: #ef4444; color: white; }
+  .mc-opt.disabled { pointer-events: none; opacity: 0.6; }
+
+  /* ==== Cloze ==== */
+  .cloze-sentence {
+    font-size: 19px;
+    line-height: 1.6;
+    color: #f1f5f9;
+    background: #0f172a;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #334155;
+  }
+  .cloze-blank {
+    display: inline-block;
+    min-width: 100px;
+    border-bottom: 2px solid #60a5fa;
+    color: transparent;
+  }
+  .cloze-input-wrap {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .cloze-ghost {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 14px 16px;
+    font-size: 18px;
+    color: #475569;
+    pointer-events: none;
+    font-family: inherit;
+    border: 1.5px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .cloze-ghost .ghost-typed {
+    color: transparent;
+  }
+  #clozeInput {
+    width: 100%;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 18px;
+    font-family: inherit;
+    position: relative;
+    z-index: 1;
+  }
+  #clozeInput:focus { outline: none; border-color: #60a5fa; }
+  #clozeInput.shake { animation: shake 0.3s; border-color: #ef4444; }
+  #clozeInput.ok { border-color: #10b981; background: rgba(16, 185, 129, 0.08); }
+  .cloze-hint {
+    font-size: 16px;
+    color: #fbbf24;
+    margin-bottom: 8px;
+  }
+  .cloze-help {
+    color: #64748b;
+    font-size: 12px;
+  }
+  .cloze-reveal {
+    color: #6ee7b7;
+    font-size: 14px;
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  /* ==== Speed ==== */
+  .speed-card {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 32px 16px;
+    text-align: center;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+    touch-action: pan-y;
+  }
+  .speed-word { font-size: 36px; font-weight: 700; color: #f1f5f9; }
+  .speed-pos  { color: #fbbf24; font-size: 14px; }
+  .speed-meaning {
+    font-size: 22px;
+    color: #60a5fa;
+    margin-top: 16px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .speed-example {
+    color: #cbd5e1;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 10px;
+    margin-top: 8px;
+    background: rgba(15, 23, 42, 0.6);
+    border-radius: 8px;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .speed-card.phase-b .speed-meaning,
+  .speed-card.phase-b .speed-example {
+    opacity: 1;
+  }
+  .speed-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .speed-controls button {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    min-height: 50px;
+  }
+  .btn-unknown { background: #ef4444; color: white; }
+  .btn-known   { background: #10b981; color: white; }
+  .speed-bar {
+    height: 4px;
+    background: #334155;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .speed-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+    width: 0%;
+  }
+
+  /* ==== Grammar ==== */
+  .gram-subtabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .gram-subtab {
+    flex: 1;
+    padding: 10px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    min-height: 44px;
+  }
+  .gram-subtab.active {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-color: transparent;
+    color: white;
+    font-weight: 600;
+  }
+  .grammar-item {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .grammar-title { font-size: 16px; font-weight: 600; color: #60a5fa; margin-bottom: 8px; }
+  .grammar-rule { color: #e2e8f0; font-size: 14px; line-height: 1.6; margin-bottom: 10px; }
+  .grammar-example {
+    background: #0f172a;
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #cbd5e1;
+    margin-top: 6px;
+    border-left: 3px solid #3b82f6;
+    white-space: pre-wrap;
+  }
+  .grammar-tip {
+    color: #fbbf24;
+    font-size: 13px;
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(251, 191, 36, 0.1);
+    border-radius: 6px;
+  }
+
+  .drill-stem {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #f1f5f9;
+    background: #0f172a;
+    padding: 14px;
+    border-radius: 10px;
+    margin: 10px 0 12px;
+    border: 1px solid #334155;
+  }
+  .drill-pattern {
+    font-size: 13px;
+    color: #a78bfa;
+    margin-bottom: 6px;
+  }
+  .drill-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .drill-opt {
+    background: #0f172a;
+    border: 1.5px solid #334155;
+    border-radius: 10px;
+    padding: 14px;
+    color: #e2e8f0;
+    font-size: 16px;
+    cursor: pointer;
+    min-height: 56px;
+    text-align: center;
+  }
+  .drill-opt:hover { background: #1e293b; }
+  .drill-opt.correct { background: #065f46; border-color: #10b981; color: white; }
+  .drill-opt.wrong   { background: #7f1d1d; border-color: #ef4444; color: white; }
+  .drill-opt.disabled { pointer-events: none; opacity: 0.6; }
+  .drill-explain {
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(96, 165, 250, 0.1);
+    color: #cbd5e1;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+
+  /* Settings dialog */
+  dialog#settings {
+    background: #1e293b;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 420px;
+    width: 90%;
+  }
+  dialog#settings::backdrop { background: rgba(0,0,0,0.6); }
+  dialog#settings h3 { margin-bottom: 12px; color: #60a5fa; }
+  dialog#settings label {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+  dialog#settings input[type="number"], dialog#settings select {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 10px;
+    background: #0f172a;
+    border: 1px solid #334155;
+    color: #e2e8f0;
+    border-radius: 6px;
+    font-family: inherit;
+  }
+  .dlg-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .dlg-actions button {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    min-height: 44px;
+  }
+  .dlg-primary { background: #3b82f6; color: white; }
+  .dlg-ghost   { background: #334155; color: #cbd5e1; }
+
+  /* Mobile single column */
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    h1 { font-size: 19px; }
+    .mode-tab { padding: 10px; font-size: 12px; flex: 1 1 30%; }
+    .mc-options, .drill-options { grid-template-columns: 1fr; }
+    .mc-word { font-size: 32px; }
+    .mc-stem { padding: 22px 12px; }
+    .panel-card { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="top">
+    <h1>TOEIC 5-Day Sprint</h1>
+    <div class="top-actions">
+      <button class="icon-btn" id="btnSettings">⚙ 設定</button>
+      <button class="icon-btn" id="btnReset">↻ 重置</button>
+    </div>
+  </header>
+
+  <div class="tabs" id="tabs">
+    <button class="mode-tab active" data-mode="today">🎯 今日衝刺</button>
+    <button class="mode-tab" data-mode="match">🔗 配對</button>
+    <button class="mode-tab" data-mode="mc">⚡ 速選</button>
+    <button class="mode-tab" data-mode="cloze">✍️ 填空</button>
+    <button class="mode-tab" data-mode="speed">🌊 快閃</button>
+    <button class="mode-tab" data-mode="grammar">📐 文法</button>
+  </div>
+
+  <div class="box-status" id="boxStatus">
+    <span class="pill new"><span class="label">New</span><span id="cntNew">0</span></span>
+    <span class="pill almost"><span class="label">Almost</span><span id="cntAlmost">0</span></span>
+    <span class="pill known"><span class="label">Known</span><span id="cntKnown">0</span></span>
+    <span style="margin-left:auto; color:#64748b; font-size:12px;" id="boxFilter"></span>
+  </div>
+
+  <!-- Today -->
+  <div class="panel active" id="panel-today">
+    <div class="panel-card" id="todayBody"></div>
+  </div>
+
+  <!-- Match -->
+  <div class="panel" id="panel-match">
+    <div class="panel-card">
+      <div class="mode-head">
+        <span id="matchProgress">0 / 6</span>
+        <div class="progress-track"><div class="progress-fill" id="matchBar"></div></div>
+        <span class="timer" id="matchTimer">⏱ 0.0s</span>
+      </div>
+      <div class="match-grid">
+        <div class="match-col" id="matchLeft"></div>
+        <div class="match-col" id="matchRight"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MC -->
+  <div class="panel" id="panel-mc">
+    <div class="panel-card">
+      <div class="mode-head">
+        <span id="mcProgress">0 / 0</span>
+        <div class="progress-track"><div class="progress-fill" id="mcBar"></div></div>
+        <span class="timer" id="mcTimer">⏱ 0.0s</span>
+      </div>
+      <div class="mc-stem">
+        <div class="mc-word" id="mcWord">—</div>
+        <div class="mc-pos" id="mcPos">—</div>
+      </div>
+      <div class="mc-options" id="mcOptions"></div>
+    </div>
+  </div>
+
+  <!-- Cloze -->
+  <div class="panel" id="panel-cloze">
+    <div class="panel-card">
+      <div class="mode-head">
+        <span id="clozeProgress">0 / 0</span>
+        <div class="progress-track"><div class="progress-fill" id="clozeBar"></div></div>
+        <span class="timer" id="clozeTimer">⏱ 0.0s</span>
+      </div>
+      <p class="cloze-sentence" id="clozeSentence">—</p>
+      <div class="cloze-input-wrap">
+        <span class="cloze-ghost" id="clozeGhost" aria-hidden="true"></span>
+        <input id="clozeInput" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" inputmode="text" placeholder="輸入英文…" />
+      </div>
+      <div class="cloze-hint" id="clozeHint">—</div>
+      <div class="cloze-reveal" id="clozeReveal"></div>
+      <div class="cloze-help">Enter 提交 · Tab 自動補全 · Esc 跳過</div>
+    </div>
+  </div>
+
+  <!-- Speed -->
+  <div class="panel" id="panel-speed">
+    <div class="panel-card">
+      <div class="mode-head">
+        <span id="speedProgress">0 / 0</span>
+        <div class="progress-track"><div class="progress-fill" id="speedOverallBar"></div></div>
+        <span class="timer" id="speedPhase">A</span>
+      </div>
+      <div class="speed-bar"><div class="speed-bar-fill" id="speedPhaseBar"></div></div>
+      <div class="speed-card phase-a" id="speedCard">
+        <div class="speed-word" id="speedWord">—</div>
+        <div class="speed-pos" id="speedPos">—</div>
+        <div class="speed-meaning" id="speedMeaning">—</div>
+        <div class="speed-example" id="speedExample">—</div>
+      </div>
+      <div class="speed-controls">
+        <button class="btn-unknown" data-mark="unknown">還不熟 (←)</button>
+        <button class="icon-btn" id="speedPause" style="flex:0 0 80px;">⏸</button>
+        <button class="btn-known" data-mark="known">會了 (→)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grammar -->
+  <div class="panel" id="panel-grammar">
+    <div class="gram-subtabs">
+      <button class="gram-subtab active" data-sub="ref">📚 Reference</button>
+      <button class="gram-subtab" data-sub="drill">⚡ Part 5 Drill</button>
+    </div>
+    <div id="gramRef"></div>
+    <div id="gramDrill" hidden>
+      <div class="panel-card">
+        <div class="mode-head">
+          <span id="drillProgress">0 / 0</span>
+          <div class="progress-track"><div class="progress-fill" id="drillBar"></div></div>
+          <span class="timer" id="drillTimer">⏱ 0.0s</span>
+        </div>
+        <div class="drill-pattern" id="drillPattern">—</div>
+        <div class="drill-stem" id="drillStem">—</div>
+        <div class="drill-options" id="drillOptions"></div>
+        <div class="drill-explain" id="drillExplain" hidden></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<dialog id="settings">
+  <h3>⚙ 設定</h3>
+  <label>MC 答對自動下一題延遲 (ms)
+    <input type="number" id="setMc" min="0" max="3000" step="50">
+  </label>
+  <label>Speed 翻面延遲 (ms)
+    <input type="number" id="setFlip" min="1000" max="15000" step="500">
+  </label>
+  <label>Speed 自動下一張延遲 (ms)
+    <input type="number" id="setAdvance" min="2000" max="20000" step="500">
+  </label>
+  <label>每次 Today 抓幾個字
+    <input type="number" id="setBatch" min="6" max="40" step="2">
+  </label>
+  <label>類別篩選
+    <select id="setFilter"></select>
+  </label>
+  <label>MC 干擾選項策略
+    <select id="setDistractor">
+      <option value="auto">自動 (almost 用同類別)</option>
+      <option value="random">隨機</option>
+      <option value="same-cat">總是同類別</option>
+    </select>
+  </label>
+  <div class="dlg-actions">
+    <button class="dlg-ghost" id="setCancel">取消</button>
+    <button class="dlg-primary" id="setSave">儲存</button>
+  </div>
+</dialog>
+
+<script>
+// ============ Region: Data ============
+const VOCAB = [
+  // 商業 Business
+  { w: "acquire", pos: "v.", m: "獲得；收購", ex: "The company acquired a smaller competitor last year.", tw: "公司去年收購了一家較小的競爭對手。", cat: "business" },
+  { w: "merge", pos: "v.", m: "合併", ex: "The two firms agreed to merge their operations.", tw: "兩家公司同意合併營運。", cat: "business" },
+  { w: "negotiate", pos: "v.", m: "協商", ex: "We need to negotiate the contract terms.", tw: "我們需要協商合約條款。", cat: "business" },
+  { w: "expand", pos: "v.", m: "擴展", ex: "They plan to expand into Asian markets.", tw: "他們計劃擴展到亞洲市場。", cat: "business" },
+  { w: "launch", pos: "v./n.", m: "推出；發佈", ex: "The product launch is scheduled for May.", tw: "產品發表預定在 5 月。", cat: "business" },
+  { w: "implement", pos: "v.", m: "實施；執行", ex: "We will implement the new policy next month.", tw: "下個月將執行新政策。", cat: "business" },
+  { w: "subsidiary", pos: "n.", m: "子公司", ex: "The subsidiary reports directly to headquarters.", tw: "子公司直接向總部報告。", cat: "business" },
+  { w: "strategy", pos: "n.", m: "策略", ex: "Our marketing strategy needs revision.", tw: "我們的行銷策略需要修改。", cat: "business" },
+
+  // 財務 Finance
+  { w: "revenue", pos: "n.", m: "營收", ex: "Annual revenue exceeded expectations.", tw: "年營收超出預期。", cat: "finance" },
+  { w: "expense", pos: "n.", m: "費用；支出", ex: "Please submit your travel expenses by Friday.", tw: "請在週五前提交差旅費用。", cat: "finance" },
+  { w: "invoice", pos: "n.", m: "發票；帳單", ex: "The invoice is due in 30 days.", tw: "這張發票 30 天內到期。", cat: "finance" },
+  { w: "budget", pos: "n./v.", m: "預算", ex: "We're operating within budget.", tw: "我們在預算內運作。", cat: "finance" },
+  { w: "deficit", pos: "n.", m: "赤字；不足", ex: "The department has a budget deficit.", tw: "該部門有預算赤字。", cat: "finance" },
+  { w: "audit", pos: "n./v.", m: "審計", ex: "An external firm will audit our books.", tw: "外部公司將審計我們的帳目。", cat: "finance" },
+  { w: "reimburse", pos: "v.", m: "報銷；償還", ex: "The company will reimburse all travel costs.", tw: "公司將報銷所有差旅費。", cat: "finance" },
+  { w: "shareholder", pos: "n.", m: "股東", ex: "The annual shareholder meeting is in June.", tw: "年度股東大會在 6 月。", cat: "finance" },
+
+  // 行銷 Marketing
+  { w: "promote", pos: "v.", m: "推廣；升職", ex: "The campaign will promote our new line.", tw: "這活動將推廣我們的新系列。", cat: "marketing" },
+  { w: "advertise", pos: "v.", m: "廣告宣傳", ex: "We advertise on multiple platforms.", tw: "我們在多個平台投放廣告。", cat: "marketing" },
+  { w: "consumer", pos: "n.", m: "消費者", ex: "Consumer behavior has shifted online.", tw: "消費者行為已轉移到線上。", cat: "marketing" },
+  { w: "demand", pos: "n./v.", m: "需求；要求", ex: "Demand for the product is increasing.", tw: "對該產品的需求正在增加。", cat: "marketing" },
+  { w: "survey", pos: "n./v.", m: "調查", ex: "The survey results were eye-opening.", tw: "調查結果令人大開眼界。", cat: "marketing" },
+  { w: "discount", pos: "n./v.", m: "折扣", ex: "Members get a 20% discount.", tw: "會員享有 8 折優惠。", cat: "marketing" },
+  { w: "endorse", pos: "v.", m: "代言；背書", ex: "A celebrity will endorse the brand.", tw: "明星將為品牌代言。", cat: "marketing" },
+
+  // 旅行 Travel
+  { w: "itinerary", pos: "n.", m: "行程表", ex: "Please review your itinerary carefully.", tw: "請仔細查看您的行程表。", cat: "travel" },
+  { w: "reservation", pos: "n.", m: "預訂", ex: "I'd like to make a reservation for two.", tw: "我想預訂兩位。", cat: "travel" },
+  { w: "boarding", pos: "n.", m: "登機", ex: "Boarding will begin at gate 12.", tw: "登機將從 12 號門開始。", cat: "travel" },
+  { w: "delay", pos: "n./v.", m: "延誤", ex: "The flight has been delayed by two hours.", tw: "航班延誤兩小時。", cat: "travel" },
+  { w: "luggage", pos: "n.", m: "行李", ex: "Your luggage exceeds the weight limit.", tw: "您的行李超過重量限制。", cat: "travel" },
+  { w: "accommodate", pos: "v.", m: "容納；提供住宿", ex: "The hotel can accommodate 500 guests.", tw: "飯店可容納 500 位賓客。", cat: "travel" },
+  { w: "complimentary", pos: "adj.", m: "免費的", ex: "Breakfast is complimentary for guests.", tw: "早餐對客人是免費的。", cat: "travel" },
+
+  // 人資 HR
+  { w: "recruit", pos: "v./n.", m: "招募", ex: "We're recruiting senior engineers.", tw: "我們正在招募資深工程師。", cat: "hr" },
+  { w: "candidate", pos: "n.", m: "候選人", ex: "We have three strong candidates.", tw: "我們有三位優秀的候選人。", cat: "hr" },
+  { w: "promotion", pos: "n.", m: "升遷", ex: "She received a well-deserved promotion.", tw: "她獲得了當之無愧的升遷。", cat: "hr" },
+  { w: "resign", pos: "v.", m: "辭職", ex: "He plans to resign at the end of the month.", tw: "他打算月底辭職。", cat: "hr" },
+  { w: "benefit", pos: "n.", m: "福利", ex: "The benefits package includes health insurance.", tw: "福利包含健康保險。", cat: "hr" },
+  { w: "qualification", pos: "n.", m: "資格", ex: "She has all the right qualifications.", tw: "她具備所有合適的資格。", cat: "hr" },
+  { w: "supervisor", pos: "n.", m: "主管", ex: "Report to your supervisor immediately.", tw: "立即向您的主管報告。", cat: "hr" },
+  { w: "intern", pos: "n.", m: "實習生", ex: "Three new interns started today.", tw: "三位新實習生今天開始上班。", cat: "hr" },
+
+  // 會議 Meetings
+  { w: "agenda", pos: "n.", m: "議程", ex: "Please review the agenda before the meeting.", tw: "開會前請查看議程。", cat: "meeting" },
+  { w: "attendee", pos: "n.", m: "出席者", ex: "All attendees must register first.", tw: "所有出席者必須先登記。", cat: "meeting" },
+  { w: "postpone", pos: "v.", m: "延期", ex: "The meeting has been postponed to Friday.", tw: "會議已延期至週五。", cat: "meeting" },
+  { w: "minutes", pos: "n.", m: "會議紀錄", ex: "Please send me the minutes of the meeting.", tw: "請寄會議紀錄給我。", cat: "meeting" },
+  { w: "proposal", pos: "n.", m: "提案", ex: "Your proposal looks promising.", tw: "你的提案看起來很有前景。", cat: "meeting" },
+  { w: "deadline", pos: "n.", m: "截止日期", ex: "We need to meet the deadline.", tw: "我們必須趕上截止日期。", cat: "meeting" },
+  { w: "feedback", pos: "n.", m: "回饋", ex: "Your feedback is much appreciated.", tw: "非常感謝您的回饋。", cat: "meeting" },
+
+  // 辦公 Office
+  { w: "schedule", pos: "n./v.", m: "排定；行程", ex: "The meeting is scheduled for 3 PM.", tw: "會議排定下午 3 點。", cat: "office" },
+  { w: "submit", pos: "v.", m: "提交", ex: "Please submit your report by Monday.", tw: "請在週一前提交報告。", cat: "office" },
+  { w: "confirm", pos: "v.", m: "確認", ex: "Could you confirm the appointment?", tw: "您能確認預約嗎？", cat: "office" },
+  { w: "approve", pos: "v.", m: "批准", ex: "The manager approved the request.", tw: "經理批准了請求。", cat: "office" },
+  { w: "purchase", pos: "v./n.", m: "購買", ex: "We need approval to purchase the equipment.", tw: "我們需要核准才能購買設備。", cat: "office" },
+  { w: "facility", pos: "n.", m: "設施", ex: "The new facility opens next month.", tw: "新設施下個月開幕。", cat: "office" },
+  { w: "maintenance", pos: "n.", m: "維護", ex: "Regular maintenance keeps systems running.", tw: "定期維護讓系統運作。", cat: "office" },
+  { w: "supply", pos: "n./v.", m: "供應；用品", ex: "We're running low on office supplies.", tw: "辦公用品快用完了。", cat: "office" },
+  { w: "shipment", pos: "n.", m: "貨運；裝運", ex: "The shipment will arrive on Tuesday.", tw: "貨物將在週二到達。", cat: "office" },
+  { w: "warehouse", pos: "n.", m: "倉庫", ex: "Items are stored in the main warehouse.", tw: "物品存放在主倉庫。", cat: "office" },
+
+  // 高頻動詞/形容詞 High Freq
+  { w: "consider", pos: "v.", m: "考慮", ex: "We should consider all options.", tw: "我們應該考慮所有選項。", cat: "common" },
+  { w: "achieve", pos: "v.", m: "達成", ex: "She achieved her sales target.", tw: "她達成了銷售目標。", cat: "common" },
+  { w: "require", pos: "v.", m: "需要；要求", ex: "This position requires fluent English.", tw: "此職位要求流利的英語。", cat: "common" },
+  { w: "ensure", pos: "v.", m: "確保", ex: "Please ensure the door is locked.", tw: "請確保門已鎖。", cat: "common" },
+  { w: "available", pos: "adj.", m: "可用的；有空的", ex: "Are you available next Monday?", tw: "你下週一有空嗎？", cat: "common" },
+  { w: "essential", pos: "adj.", m: "必要的", ex: "Communication is essential in teamwork.", tw: "溝通在團隊合作中至關重要。", cat: "common" },
+  { w: "previous", pos: "adj.", m: "先前的", ex: "Refer to the previous email.", tw: "請參考先前的郵件。", cat: "common" },
+  { w: "efficient", pos: "adj.", m: "有效率的", ex: "We need a more efficient process.", tw: "我們需要更有效率的流程。", cat: "common" },
+  { w: "extensive", pos: "adj.", m: "廣泛的", ex: "He has extensive experience in finance.", tw: "他在金融方面有豐富經驗。", cat: "common" },
+  { w: "tentative", pos: "adj.", m: "暫定的", ex: "This is a tentative schedule.", tw: "這是暫定的時間表。", cat: "common" },
+];
+
+const CATEGORIES = [
+  { id: "all", name: "全部" },
+  { id: "business", name: "商業" },
+  { id: "finance", name: "財務" },
+  { id: "marketing", name: "行銷" },
+  { id: "travel", name: "旅行" },
+  { id: "hr", name: "人資" },
+  { id: "meeting", name: "會議" },
+  { id: "office", name: "辦公" },
+  { id: "common", name: "高頻" },
+];
+
+const GRAMMAR = [
+  {
+    title: "1. 詞性辨識（Part 5 最常考）",
+    rule: "看空格前後的詞性決定要填的詞性。冠詞/形容詞後 → 名詞；be 動詞/助動詞後 → 動詞；動詞/形容詞前 → 副詞。",
+    example: "The manager's _____ (decide / decision / decisive / decisively) was unexpected.\n答案: decision (名詞，前面是所有格 's)",
+    tip: "💡 字尾線索：-tion/-ment/-ness=名詞；-ly=副詞；-ive/-ous/-able=形容詞；-ize/-ate=動詞"
+  },
+  {
+    title: "2. 主動 vs 被動",
+    rule: "句子有受詞 → 主動；無受詞 + by 出現 → 被動。被動 = be + p.p.",
+    example: "The report _____ (submitted / was submitted) yesterday.\n答案: was submitted (沒有受詞，且 by 不一定要出現)",
+    tip: "💡 看主詞會不會「自己做」這動作；報告不會自己交，所以被動。"
+  },
+  {
+    title: "3. 時態判斷",
+    rule: "看時間副詞：\n• yesterday/last/ago → 過去式\n• already/just/since/for → 現在完成式\n• tomorrow/next/will → 未來式\n• now/at the moment → 現在進行式",
+    example: "She _____ for this company since 2018.\n答案: has worked (since → 現在完成式)",
+    tip: "💡 by + 未來時間 → 用未來完成式 (will have + p.p.)"
+  },
+  {
+    title: "4. 主詞動詞一致",
+    rule: "主詞單數 → 動詞加 s；複數 → 動詞原形。注意 each / every / one of → 單數。",
+    example: "Each of the employees _____ (was / were) given a bonus.\n答案: was (each of → 單數)",
+    tip: "💡 The number of = 單數 / A number of = 複數"
+  },
+  {
+    title: "5. 連接詞 vs 介系詞",
+    rule: "後面接「子句 (S+V)」用連接詞；後面接「名詞 / 動名詞」用介系詞。\n• although (連) vs despite (介)\n• because (連) vs because of (介)\n• while (連) vs during (介)",
+    example: "_____ the heavy rain, the event was held outdoors.\n答案: Despite (後面接名詞片語)",
+    tip: "💡 看空格後第一個有沒有 S+V，這題秒殺。"
+  },
+  {
+    title: "6. 關係代名詞",
+    rule: "• 人 → who / whom\n• 物 → which / that\n• 所有格 → whose\n• 地點 → where / 時間 → when",
+    example: "The candidate _____ we interviewed yesterday accepted the offer.\n答案: whom (受格，可省略)",
+    tip: "💡 that 不能用在逗號後 (非限定)；whom 後面接 S+V"
+  },
+  {
+    title: "7. 假設語氣",
+    rule: "• 與現在事實相反: If + 過去式, S + would/could + V\n• 與過去事實相反: If + had p.p., S + would have p.p.\n• if 省略時要倒裝: Were I you... / Had I known...",
+    example: "If I _____ the manager, I would approve it.\n答案: were (與現在事實相反)",
+    tip: "💡 wish / as if 後面也用假設語氣"
+  },
+  {
+    title: "8. 介系詞時間/地點",
+    rule: "• in + 月/年/季/上下午 (in May, in 2026)\n• on + 日期/星期 (on Monday)\n• at + 時刻/地點 (at 3 PM)\n• by + 期限「在…之前」\n• until + 持續到「直到」",
+    example: "Please submit it _____ Friday.\n答案: by (期限) / 若是 until 表示「持續做到週五」",
+    tip: "💡 by = deadline (一次性) / until = duration (持續)"
+  },
+  {
+    title: "9. 動名詞 vs 不定詞",
+    rule: "• 後接 V-ing: enjoy, finish, mind, suggest, consider, avoid, recommend\n• 後接 to V: want, decide, plan, hope, agree, refuse, manage\n• 兩種都可: like, love, prefer, start, begin",
+    example: "We recommend _____ (to submit / submitting) the report early.\n答案: submitting",
+    tip: "💡 介系詞後一定接動名詞 (V-ing)"
+  },
+  {
+    title: "10. 比較級 / 最高級",
+    rule: "• 比較級 + than\n• the + 最高級 + in/of\n• 比較級加強: much / far / a lot / even (不能用 very)",
+    example: "This proposal is _____ (much / very) better than the previous one.\n答案: much",
+    tip: "💡 as...as 中間是原級，不是比較級"
+  },
+  {
+    title: "11. 形容詞子句省略",
+    rule: "關代 + be 動詞 可一起省略。\n• 主動: who/which is V-ing → 直接 V-ing\n• 被動: who/which is p.p. → 直接 p.p.",
+    example: "The report _____ (submitted) yesterday was approved.\n答案: submitted (= which was submitted)",
+    tip: "💡 看到名詞後面突然出現 V-ing 或 p.p.，多半是省略結構。"
+  },
+  {
+    title: "12. 連接副詞 (Part 6 必考)",
+    rule: "• however 然而 (轉折)\n• therefore 因此 (因果)\n• moreover / furthermore 此外 (補充)\n• nevertheless 儘管如此\n• otherwise 否則\n• in addition 另外",
+    example: "Sales dropped last quarter. _____, we remain optimistic.\n答案: Nevertheless / However",
+    tip: "💡 連接副詞 ≠ 連接詞，前面要句點或分號"
+  },
+  {
+    title: "13. 量詞搭配",
+    rule: "• much / little + 不可數\n• many / few + 可數複數\n• a lot of / plenty of / some → 都可\n• fewer (可數) vs less (不可數)",
+    example: "There are _____ (fewer / less) applicants this year.\n答案: fewer (applicants 可數)",
+    tip: "💡 a few = 一些 (肯定) / few = 幾乎沒有 (否定)"
+  },
+  {
+    title: "14. 平行結構",
+    rule: "and / or / but 連接的東西，前後詞性結構必須一致。",
+    example: "She is responsible for hiring, training, and _____ (evaluation / evaluating) staff.\n答案: evaluating (與 hiring, training 並列)",
+    tip: "💡 列舉時前後動名詞、名詞、形容詞要一致"
+  },
+  {
+    title: "15. 倒裝句",
+    rule: "否定副詞放句首要倒裝：\n• Not only... but also...\n• Never / Rarely / Hardly / Seldom\n• No sooner... than...",
+    example: "Not only _____ (he did / did he) submit it on time, but he also exceeded expectations.\n答案: did he (倒裝)",
+    tip: "💡 看到句首是否定副詞，後面動詞要拉到主詞前"
+  },
+];
+
+const GRAMMAR_DRILL = [
+  { pattern: "主詞動詞一致", q: "The committee _____ reached a decision.", correct: "has", wrong: "have", explain: "committee 集合名詞當整體，視為單數。" },
+  { pattern: "連接詞 vs 介系詞", q: "_____ the rain, the meeting was held outside.", correct: "Despite", wrong: "Although", explain: "後面是名詞片語 (the rain)，要用介系詞 Despite。" },
+  { pattern: "時態判斷", q: "She has worked here _____ 2018.", correct: "since", wrong: "for", explain: "since + 時間點；for + 時間長度。" },
+  { pattern: "介系詞", q: "Please submit your report _____ Friday.", correct: "by", wrong: "until", explain: "by = 期限 (在…之前) / until = 持續到。" },
+  { pattern: "形容詞子句省略", q: "The report _____ yesterday was excellent.", correct: "submitted", wrong: "submitting", explain: "報告是「被」交，所以用 p.p. (= which was submitted)。" },
+  { pattern: "假設語氣", q: "If I _____ you, I would accept the offer.", correct: "were", wrong: "was", explain: "假設語氣與現在事實相反，be 動詞用 were。" },
+  { pattern: "動名詞 vs 不定詞", q: "We recommend _____ the report early.", correct: "submitting", wrong: "to submit", explain: "recommend 後面接動名詞 (V-ing)。" },
+  { pattern: "倒裝句", q: "Not only _____ on time, but he also exceeded the goal.", correct: "did he submit", wrong: "he submitted", explain: "Not only 放句首要倒裝。" },
+  { pattern: "量詞", q: "There are _____ applicants this year than last year.", correct: "fewer", wrong: "less", explain: "applicants 可數複數，用 fewer。" },
+  { pattern: "詞性辨識", q: "The manager's _____ surprised everyone.", correct: "decision", wrong: "decide", explain: "所有格 's 後面要接名詞。" },
+];
+
+// ============ Region: State ============
+const STORAGE_KEY = "toeic-cram-progress";
+const STATE_VERSION = 2;
+
+const initialState = {
+  version: STATE_VERSION,
+  boxes: { new: [], almost: [], known: [] },
+  cardStats: {},
+  filter: "all",
+  settings: {
+    mcAutoAdvanceMs: 600,
+    speedFlipMs: 4000,
+    speedAdvanceMs: 8000,
+    batchSize: 20,
+    matchPairs: 6,
+    distractorMode: "auto"
+  },
+  session: {
+    active: false,
+    startedAt: 0,
+    stage: null,
+    stageIndex: 0,
+    batch: [],
+    perStage: {
+      match: { done: 0, correct: 0, total: 0 },
+      mc:    { done: 0, correct: 0, total: 0 },
+      cloze: { done: 0, correct: 0, total: 0 },
+      speed: { done: 0, correct: 0, total: 0 }
+    }
+  },
+  history: { sessions: 0, lastFinishedAt: 0, totalKnownWords: 0 }
+};
+
+let state = clone(initialState);
+
+function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+function deepMerge(target, src) {
+  if (!src || typeof src !== "object") return target;
+  for (const k of Object.keys(src)) {
+    if (src[k] && typeof src[k] === "object" && !Array.isArray(src[k]) &&
+        target[k] && typeof target[k] === "object" && !Array.isArray(target[k])) {
+      deepMerge(target[k], src[k]);
+    } else if (src[k] !== undefined) {
+      target[k] = src[k];
+    }
+  }
+  return target;
+}
+
+function loadState() {
+  state = clone(initialState);
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) { seedAllNew(); return; }
+    const parsed = JSON.parse(raw);
+    // Migration: old shape has no version + has `known` map
+    if (!parsed.version || parsed.version < STATE_VERSION) {
+      migrateFromV1(parsed);
+    } else {
+      deepMerge(state, parsed);
+      reconcileBoxes();
+    }
+  } catch (e) {
+    console.warn("loadState failed, resetting", e);
+    state = clone(initialState);
+    seedAllNew();
+  }
+}
+
+function migrateFromV1(old) {
+  // Old shape: { currentIdx, filter, known: { word: bool }, quizScore }
+  state = clone(initialState);
+  const knownMap = (old && old.known) || {};
+  for (const v of VOCAB) {
+    const w = v.w;
+    if (knownMap[w] === true) state.boxes.known.push(w);
+    else if (knownMap[w] === false) state.boxes.almost.push(w);
+    else state.boxes.new.push(w);
+    state.cardStats[w] = { correct: 0, wrong: 0, streak: 0, lastSeen: 0 };
+  }
+  if (old && old.filter && CATEGORIES.some(c => c.id === old.filter)) {
+    state.filter = old.filter;
+  }
+  saveStateNow();
+}
+
+function reconcileBoxes() {
+  // Ensure every VOCAB word lives in exactly one box; remove unknown words.
+  const all = new Set(VOCAB.map(v => v.w));
+  for (const k of ["new", "almost", "known"]) {
+    state.boxes[k] = (state.boxes[k] || []).filter(w => all.has(w));
+  }
+  const placed = new Set([...state.boxes.new, ...state.boxes.almost, ...state.boxes.known]);
+  for (const v of VOCAB) {
+    if (!placed.has(v.w)) state.boxes.new.push(v.w);
+    if (!state.cardStats[v.w]) state.cardStats[v.w] = { correct: 0, wrong: 0, streak: 0, lastSeen: 0 };
+  }
+}
+
+function seedAllNew() {
+  state.boxes.new = VOCAB.map(v => v.w);
+  for (const v of VOCAB) state.cardStats[v.w] = { correct: 0, wrong: 0, streak: 0, lastSeen: 0 };
+  saveStateNow();
+}
+
+let saveTimer = null;
+function saveState() {
+  if (saveTimer) return;
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    saveStateNow();
+  }, 200);
+}
+function saveStateNow() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* quota */ }
+}
+
+function resetProgress() {
+  if (!confirm("確定要重置所有進度嗎？")) return;
+  state = clone(initialState);
+  seedAllNew();
+  endSession();
+  switchMode("today");
+  renderBoxStatus();
+}
+
+// ============ Region: Leitner ============
+function findBox(w) {
+  if (state.boxes.known.includes(w)) return "known";
+  if (state.boxes.almost.includes(w)) return "almost";
+  if (state.boxes.new.includes(w)) return "new";
+  return null;
+}
+function moveBox(w, from, to) {
+  const arr = state.boxes[from];
+  const i = arr.indexOf(w);
+  if (i >= 0) arr.splice(i, 1);
+  if (!state.boxes[to].includes(w)) state.boxes[to].push(w);
+}
+
+function gradeAnswer(w, correct) {
+  if (!w) return;
+  const s = state.cardStats[w] = state.cardStats[w] || { correct: 0, wrong: 0, streak: 0, lastSeen: 0 };
+  s.lastSeen = Date.now();
+  const box = findBox(w) || "new";
+  if (correct) {
+    s.correct++; s.streak++;
+    if (box === "new")    moveBox(w, "new", "almost");
+    else if (box === "almost" && s.streak >= 2) moveBox(w, "almost", "known");
+  } else {
+    s.wrong++; s.streak = 0;
+    if (box === "known") moveBox(w, "known", "almost");
+    // almost stays in almost; new stays in new
+  }
+  saveState();
+  renderBoxStatus();
+}
+
+function drawFromBoxes(n, opts = {}) {
+  const filter = state.filter;
+  const inFilter = (w) => {
+    if (filter === "all") return true;
+    const v = vocabByWord(w);
+    return v && v.cat === filter;
+  };
+  const almost = shuffle(state.boxes.almost.filter(inFilter));
+  const fresh  = shuffle(state.boxes.new.filter(inFilter));
+  const known  = shuffle(state.boxes.known.filter(inFilter));
+  const out = [...almost, ...fresh];
+  if (out.length < n) out.push(...known);
+  return out.slice(0, n);
+}
+
+function vocabByWord(w) {
+  return VOCAB.find(v => v.w === w);
+}
+
+function renderBoxStatus() {
+  document.getElementById("cntNew").textContent    = state.boxes.new.length;
+  document.getElementById("cntAlmost").textContent = state.boxes.almost.length;
+  document.getElementById("cntKnown").textContent  = state.boxes.known.length;
+  const f = CATEGORIES.find(c => c.id === state.filter);
+  document.getElementById("boxFilter").textContent = state.filter === "all" ? "" : `篩選: ${f ? f.name : state.filter}`;
+}
+
+// ============ Region: Util ============
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function inflect(w) {
+  const forms = new Set([w]);
+  forms.add(w + "s");
+  forms.add(w + "ed");
+  forms.add(w + "ing");
+  if (w.endsWith("e")) {
+    forms.add(w.slice(0, -1) + "ing");
+    forms.add(w + "d");
+  }
+  if (w.endsWith("y")) {
+    forms.add(w.slice(0, -1) + "ies");
+    forms.add(w.slice(0, -1) + "ied");
+  }
+  return [...forms];
+}
+
+function stripSuffix(w) {
+  // Loose stemmer for cloze comparison
+  let s = w.toLowerCase().trim();
+  if (s.endsWith("ing")) {
+    let base = s.slice(0, -3);
+    return [s, base, base + "e"];
+  }
+  if (s.endsWith("ied")) return [s, s.slice(0, -3) + "y"];
+  if (s.endsWith("ies")) return [s, s.slice(0, -3) + "y"];
+  if (s.endsWith("ed"))  return [s, s.slice(0, -2), s.slice(0, -1)]; // -ed, base, +e
+  if (s.endsWith("es"))  return [s, s.slice(0, -2), s.slice(0, -1)];
+  if (s.endsWith("s") && !s.endsWith("ss")) return [s, s.slice(0, -1)];
+  if (s.endsWith("d"))   return [s, s.slice(0, -1)];
+  return [s];
+}
+
+function clozeMatches(input, target) {
+  const t = target.toLowerCase().trim();
+  const u = input.toLowerCase().trim();
+  if (!u) return false;
+  if (u === t) return true;
+  const targetForms = new Set(inflect(t));
+  if (targetForms.has(u)) return true;
+  // Stem the user input and see if it reduces to the target
+  const stems = stripSuffix(u);
+  return stems.some(s => s === t);
+}
+
+function buildCloze(v) {
+  const target = v.w.toLowerCase();
+  const forms = inflect(target);
+  // Sort longer first so "acquired" matches before "acquire"
+  forms.sort((a, b) => b.length - a.length);
+  const re = new RegExp(`\\b(${forms.join("|")})\\b`, "i");
+  const m = v.ex.match(re);
+  if (!m) {
+    return { displayed: v.ex, blanked: v.ex, missing: target, fallback: true };
+  }
+  const blanked = v.ex.replace(re, "<span class=\"cloze-blank\">________</span>");
+  return { displayed: v.ex, blanked, missing: m[1].toLowerCase(), fallback: false };
+}
+
+// ============ Region: Mode/Match ============
+const matchCtx = {
+  pairs: [],            // batch of vocab objects (size matchPairs)
+  selected: { L: null, R: null },
+  matched: 0,
+  startedAt: 0,
+  timerId: null,
+  embedded: false,      // true when used in Today
+  onComplete: null
+};
+
+function renderMatch(opts = {}) {
+  const root = opts.root || document;
+  const pairsCount = state.settings.matchPairs;
+  const batch = (opts.batch && opts.batch.length >= 2) ? opts.batch.slice(0, pairsCount) : drawFromBoxes(pairsCount).map(vocabByWord).filter(Boolean);
+  if (batch.length < 2) {
+    setMatchMessage(root, "目前 Almost / New 都空了 — 切到別的模式吧 ✨");
+    return;
+  }
+  matchCtx.pairs = batch;
+  matchCtx.selected = { L: null, R: null };
+  matchCtx.matched = 0;
+  matchCtx.startedAt = Date.now();
+  matchCtx.embedded = !!opts.embedded;
+  matchCtx.onComplete = opts.onComplete || null;
+
+  const lefts  = shuffle(batch.map(v => ({ side: "L", id: v.w, label: v.w })));
+  const rights = shuffle(batch.map(v => ({ side: "R", id: v.w, label: v.m })));
+  const leftEl  = root.querySelector("#matchLeft");
+  const rightEl = root.querySelector("#matchRight");
+  leftEl.innerHTML  = lefts .map(t => `<button class="match-tile" data-side="L" data-id="${escapeAttr(t.id)}">${escapeHtml(t.label)}</button>`).join("");
+  rightEl.innerHTML = rights.map(t => `<button class="match-tile" data-side="R" data-id="${escapeAttr(t.id)}">${escapeHtml(t.label)}</button>`).join("");
+  leftEl .querySelectorAll(".match-tile").forEach(b => b.addEventListener("click", () => onMatchTap(b)));
+  rightEl.querySelectorAll(".match-tile").forEach(b => b.addEventListener("click", () => onMatchTap(b)));
+
+  setMatchProgress(0, batch.length);
+  startMatchTimer();
+}
+
+function setMatchMessage(root, msg) {
+  root.querySelector("#matchLeft").innerHTML = `<div style="color:#94a3b8;text-align:center;padding:24px;">${escapeHtml(msg)}</div>`;
+  root.querySelector("#matchRight").innerHTML = "";
+}
+
+function setMatchProgress(done, total) {
+  document.getElementById("matchProgress").textContent = `${done} / ${total}`;
+  document.getElementById("matchBar").style.width = `${total ? (done / total * 100) : 0}%`;
+}
+function startMatchTimer() {
+  stopMatchTimer();
+  matchCtx.timerId = setInterval(() => {
+    const sec = ((Date.now() - matchCtx.startedAt) / 1000).toFixed(1);
+    document.getElementById("matchTimer").textContent = `⏱ ${sec}s`;
+  }, 100);
+}
+function stopMatchTimer() {
+  if (matchCtx.timerId) { clearInterval(matchCtx.timerId); matchCtx.timerId = null; }
+}
+
+function onMatchTap(btn) {
+  if (btn.classList.contains("matched")) return;
+  const side = btn.dataset.side;
+  const id   = btn.dataset.id;
+  // Toggle deselect
+  if (matchCtx.selected[side] === btn) {
+    btn.classList.remove("selected");
+    matchCtx.selected[side] = null;
+    return;
+  }
+  // Replace previous on this side
+  if (matchCtx.selected[side]) matchCtx.selected[side].classList.remove("selected");
+  matchCtx.selected[side] = btn;
+  btn.classList.add("selected");
+
+  if (matchCtx.selected.L && matchCtx.selected.R) {
+    resolveMatch();
+  }
+}
+
+function resolveMatch() {
+  const L = matchCtx.selected.L, R = matchCtx.selected.R;
+  const ok = L.dataset.id === R.dataset.id;
+  if (ok) {
+    L.classList.add("matched");
+    R.classList.add("matched");
+    L.classList.remove("selected");
+    R.classList.remove("selected");
+    matchCtx.matched++;
+    setMatchProgress(matchCtx.matched, matchCtx.pairs.length);
+    gradeAnswer(L.dataset.id, true);
+    matchCtx.selected = { L: null, R: null };
+    if (state.session.active && state.session.stage === "match") {
+      const ps = state.session.perStage.match;
+      ps.done++; ps.correct++; saveState();
+    }
+    if (matchCtx.matched >= matchCtx.pairs.length) {
+      stopMatchTimer();
+      setTimeout(() => {
+        if (matchCtx.onComplete) matchCtx.onComplete();
+        else renderMatch(); // free practice: pull next batch
+      }, 600);
+    }
+  } else {
+    L.classList.add("shake");
+    R.classList.add("shake");
+    gradeAnswer(L.dataset.id, false);
+    if (state.session.active && state.session.stage === "match") {
+      state.session.perStage.match.done++;
+      saveState();
+    }
+    setTimeout(() => {
+      L.classList.remove("shake", "selected");
+      R.classList.remove("shake", "selected");
+      matchCtx.selected = { L: null, R: null };
+    }, 350);
+  }
+}
+
+// ============ Region: Mode/MC ============
+const mcCtx = {
+  queue: [],
+  idx: 0,
+  startedAt: 0,
+  timerId: null,
+  current: null,
+  locked: false,
+  onComplete: null
+};
+
+function renderMC(opts = {}) {
+  const queue = (opts.batch && opts.batch.length) ? opts.batch.slice() : drawFromBoxes(state.settings.batchSize);
+  mcCtx.queue = queue.map(w => typeof w === "string" ? vocabByWord(w) : w).filter(Boolean);
+  mcCtx.idx = 0;
+  mcCtx.startedAt = Date.now();
+  mcCtx.onComplete = opts.onComplete || null;
+  if (!mcCtx.queue.length) {
+    document.getElementById("mcWord").textContent = "—";
+    document.getElementById("mcPos").textContent = "目前沒題目";
+    document.getElementById("mcOptions").innerHTML = "";
+    return;
+  }
+  startMCTimer();
+  showMCQuestion();
+}
+
+function startMCTimer() {
+  stopMCTimer();
+  mcCtx.timerId = setInterval(() => {
+    const sec = ((Date.now() - mcCtx.startedAt) / 1000).toFixed(1);
+    document.getElementById("mcTimer").textContent = `⏱ ${sec}s`;
+  }, 100);
+}
+function stopMCTimer() { if (mcCtx.timerId) { clearInterval(mcCtx.timerId); mcCtx.timerId = null; } }
+
+function pickDistractors(target, n = 3) {
+  const pool = VOCAB.filter(v => v.w !== target.w);
+  const mode = state.settings.distractorMode;
+  const box = findBox(target.w) || "new";
+  let useSameCat = false;
+  if (mode === "same-cat") useSameCat = true;
+  else if (mode === "auto") useSameCat = (box === "almost" || box === "known");
+  let candidates = pool;
+  if (useSameCat) {
+    const sc = pool.filter(v => v.cat === target.cat);
+    if (sc.length >= n) candidates = sc;
+  }
+  return shuffle(candidates).slice(0, n);
+}
+
+function showMCQuestion() {
+  if (mcCtx.idx >= mcCtx.queue.length) {
+    stopMCTimer();
+    if (mcCtx.onComplete) mcCtx.onComplete();
+    else {
+      document.getElementById("mcWord").textContent = "✓ 完成";
+      document.getElementById("mcPos").textContent = `共 ${mcCtx.queue.length} 題`;
+      document.getElementById("mcOptions").innerHTML = `<button class="mc-opt" onclick="renderMC()" style="grid-column: span 2; justify-content:center;">再來一輪</button>`;
+    }
+    return;
+  }
+  const v = mcCtx.queue[mcCtx.idx];
+  mcCtx.current = v;
+  mcCtx.locked = false;
+  const distractors = pickDistractors(v, 3);
+  const options = shuffle([v, ...distractors]);
+  document.getElementById("mcWord").textContent = v.w;
+  document.getElementById("mcPos").textContent  = v.pos;
+  document.getElementById("mcProgress").textContent = `${mcCtx.idx + 1} / ${mcCtx.queue.length}`;
+  document.getElementById("mcBar").style.width = `${(mcCtx.idx) / mcCtx.queue.length * 100}%`;
+  const opts = options.map((o, i) =>
+    `<button class="mc-opt" data-idx="${i}" data-correct="${o.w === v.w}"><span class="mc-num">${i + 1}</span><span class="mc-text">${escapeHtml(o.m)}</span></button>`
+  ).join("");
+  const cont = document.getElementById("mcOptions");
+  cont.innerHTML = opts;
+  cont.querySelectorAll(".mc-opt").forEach(b => b.addEventListener("click", () => onMCPick(b)));
+}
+
+function onMCPick(btn) {
+  if (mcCtx.locked) return;
+  mcCtx.locked = true;
+  const correct = btn.dataset.correct === "true";
+  const v = mcCtx.current;
+  const cont = document.getElementById("mcOptions");
+  cont.querySelectorAll(".mc-opt").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.correct === "true") b.classList.add("correct");
+  });
+  if (!correct) btn.classList.add("wrong");
+  gradeAnswer(v.w, correct);
+  if (state.session.active && state.session.stage === "mc") {
+    const ps = state.session.perStage.mc;
+    ps.done++; if (correct) ps.correct++; saveState();
+  }
+  document.getElementById("mcBar").style.width = `${(mcCtx.idx + 1) / mcCtx.queue.length * 100}%`;
+  const delay = correct ? state.settings.mcAutoAdvanceMs : Math.max(state.settings.mcAutoAdvanceMs, 900);
+  setTimeout(() => {
+    mcCtx.idx++;
+    showMCQuestion();
+  }, delay);
+}
+
+// ============ Region: Mode/Cloze ============
+const clozeCtx = {
+  queue: [],
+  idx: 0,
+  current: null,
+  cloze: null,
+  startedAt: 0,
+  timerId: null,
+  locked: false,
+  onComplete: null
+};
+
+function renderCloze(opts = {}) {
+  const queue = (opts.batch && opts.batch.length) ? opts.batch.slice() : drawFromBoxes(state.settings.batchSize);
+  clozeCtx.queue = queue.map(w => typeof w === "string" ? vocabByWord(w) : w).filter(Boolean);
+  clozeCtx.idx = 0;
+  clozeCtx.startedAt = Date.now();
+  clozeCtx.onComplete = opts.onComplete || null;
+  startClozeTimer();
+  showClozeQuestion();
+}
+
+function startClozeTimer() {
+  stopClozeTimer();
+  clozeCtx.timerId = setInterval(() => {
+    const sec = ((Date.now() - clozeCtx.startedAt) / 1000).toFixed(1);
+    document.getElementById("clozeTimer").textContent = `⏱ ${sec}s`;
+  }, 100);
+}
+function stopClozeTimer() { if (clozeCtx.timerId) { clearInterval(clozeCtx.timerId); clozeCtx.timerId = null; } }
+
+function showClozeQuestion() {
+  const input = document.getElementById("clozeInput");
+  const ghost = document.getElementById("clozeGhost");
+  input.classList.remove("shake", "ok");
+  input.value = "";
+  ghost.innerHTML = "";
+  document.getElementById("clozeReveal").textContent = "";
+  if (clozeCtx.idx >= clozeCtx.queue.length) {
+    stopClozeTimer();
+    if (clozeCtx.onComplete) clozeCtx.onComplete();
+    else {
+      document.getElementById("clozeSentence").innerHTML = "✓ 全部完成";
+      document.getElementById("clozeHint").textContent = "";
+      document.getElementById("clozeReveal").innerHTML = `<button class="icon-btn" onclick="renderCloze()">再來一輪</button>`;
+    }
+    return;
+  }
+  const v = clozeCtx.queue[clozeCtx.idx];
+  const cz = buildCloze(v);
+  clozeCtx.current = v;
+  clozeCtx.cloze = cz;
+  clozeCtx.locked = false;
+  document.getElementById("clozeSentence").innerHTML = cz.blanked;
+  document.getElementById("clozeHint").textContent = `${v.m}（${v.pos}）`;
+  document.getElementById("clozeProgress").textContent = `${clozeCtx.idx + 1} / ${clozeCtx.queue.length}`;
+  document.getElementById("clozeBar").style.width = `${(clozeCtx.idx) / clozeCtx.queue.length * 100}%`;
+  // Focus shortly after the panel becomes visible
+  setTimeout(() => input.focus(), 50);
+}
+
+function onClozeInput() {
+  if (clozeCtx.locked) return;
+  const input = document.getElementById("clozeInput");
+  const ghost = document.getElementById("clozeGhost");
+  const target = (clozeCtx.cloze && clozeCtx.cloze.missing) || "";
+  const u = input.value;
+  if (u && target.toLowerCase().startsWith(u.toLowerCase())) {
+    const rest = target.slice(u.length);
+    ghost.innerHTML = `<span class="ghost-typed">${escapeHtml(u)}</span>${escapeHtml(rest)}`;
+  } else {
+    ghost.innerHTML = "";
+  }
+}
+
+function onClozeKey(e) {
+  if (clozeCtx.locked) return;
+  const input = document.getElementById("clozeInput");
+  if (e.key === "Enter") {
+    e.preventDefault();
+    submitCloze();
+  } else if (e.key === "Tab") {
+    e.preventDefault();
+    skipCloze(false); // Tab = skip but not penalize as hard? Spec: skip
+  } else if (e.key === "Escape") {
+    e.preventDefault();
+    skipCloze(true);
+  }
+}
+
+function submitCloze() {
+  if (clozeCtx.locked) return;
+  clozeCtx.locked = true;
+  const input = document.getElementById("clozeInput");
+  const v = clozeCtx.current;
+  const ok = clozeMatches(input.value, v.w);
+  if (ok) {
+    input.classList.add("ok");
+    document.getElementById("clozeReveal").textContent = `✓ ${v.w}`;
+    gradeAnswer(v.w, true);
+    if (state.session.active && state.session.stage === "cloze") {
+      const ps = state.session.perStage.cloze;
+      ps.done++; ps.correct++; saveState();
+    }
+    setTimeout(() => { clozeCtx.idx++; showClozeQuestion(); }, 500);
+  } else {
+    input.classList.add("shake");
+    document.getElementById("clozeReveal").textContent = `✗ 答案: ${v.w}`;
+    gradeAnswer(v.w, false);
+    if (state.session.active && state.session.stage === "cloze") {
+      state.session.perStage.cloze.done++; saveState();
+    }
+    setTimeout(() => { clozeCtx.idx++; showClozeQuestion(); }, 1500);
+  }
+  document.getElementById("clozeBar").style.width = `${(clozeCtx.idx + 1) / clozeCtx.queue.length * 100}%`;
+}
+
+function skipCloze(penalize) {
+  if (clozeCtx.locked) return;
+  clozeCtx.locked = true;
+  const v = clozeCtx.current;
+  document.getElementById("clozeReveal").textContent = `跳過 — 答案: ${v.w}`;
+  if (penalize) gradeAnswer(v.w, false);
+  if (state.session.active && state.session.stage === "cloze") {
+    state.session.perStage.cloze.done++; saveState();
+  }
+  setTimeout(() => { clozeCtx.idx++; showClozeQuestion(); }, 800);
+}
+
+// ============ Region: Mode/Speed ============
+const speedCtx = {
+  queue: [],
+  idx: 0,
+  current: null,
+  phase: "A",
+  rafId: null,
+  targetTs: 0,
+  paused: false,
+  pausedRemain: 0,
+  startedAt: 0,
+  marked: null,         // "known" | "unknown" | null
+  onComplete: null,
+  // Touch
+  touchStartX: 0,
+  touchStartY: 0,
+};
+
+function renderSpeed(opts = {}) {
+  cancelSpeed();
+  const queue = (opts.batch && opts.batch.length) ? opts.batch.slice() : drawFromBoxes(state.settings.batchSize);
+  speedCtx.queue = queue.map(w => typeof w === "string" ? vocabByWord(w) : w).filter(Boolean);
+  speedCtx.idx = 0;
+  speedCtx.startedAt = Date.now();
+  speedCtx.onComplete = opts.onComplete || null;
+  if (!speedCtx.queue.length) {
+    document.getElementById("speedWord").textContent = "—";
+    document.getElementById("speedMeaning").textContent = "目前沒題目";
+    return;
+  }
+  showSpeedCard();
+}
+
+function showSpeedCard() {
+  if (speedCtx.idx >= speedCtx.queue.length) {
+    cancelSpeed();
+    if (speedCtx.onComplete) speedCtx.onComplete();
+    else {
+      document.getElementById("speedWord").textContent = "✓ 完成";
+      document.getElementById("speedMeaning").textContent = "";
+      document.getElementById("speedExample").textContent = "";
+      document.getElementById("speedCard").classList.remove("phase-b");
+      document.getElementById("speedCard").classList.add("phase-a");
+    }
+    return;
+  }
+  const v = speedCtx.queue[speedCtx.idx];
+  speedCtx.current = v;
+  speedCtx.phase = "A";
+  speedCtx.marked = null;
+  speedCtx.paused = false;
+  document.getElementById("speedWord").textContent = v.w;
+  document.getElementById("speedPos").textContent  = v.pos;
+  document.getElementById("speedMeaning").textContent = v.m;
+  document.getElementById("speedExample").innerHTML = `${escapeHtml(v.ex)}<div style="color:#94a3b8;margin-top:4px;font-size:12px;">${escapeHtml(v.tw)}</div>`;
+  const card = document.getElementById("speedCard");
+  card.classList.remove("phase-b");
+  card.classList.add("phase-a");
+  document.getElementById("speedProgress").textContent = `${speedCtx.idx + 1} / ${speedCtx.queue.length}`;
+  document.getElementById("speedOverallBar").style.width = `${speedCtx.idx / speedCtx.queue.length * 100}%`;
+  document.getElementById("speedPhase").textContent = "A";
+  speedCtx.targetTs = performance.now() + state.settings.speedFlipMs;
+  speedCtx.rafId = requestAnimationFrame(speedTick);
+}
+
+function speedTick() {
+  if (!speedCtx.queue.length) return;
+  if (speedCtx.paused) {
+    speedCtx.rafId = requestAnimationFrame(speedTick);
+    return;
+  }
+  const now = performance.now();
+  const phaseTotal = speedCtx.phase === "A" ? state.settings.speedFlipMs : (state.settings.speedAdvanceMs - state.settings.speedFlipMs);
+  const remain = Math.max(0, speedCtx.targetTs - now);
+  const elapsed = Math.max(0, phaseTotal - remain);
+  const pct = phaseTotal > 0 ? (elapsed / phaseTotal) * 100 : 100;
+  document.getElementById("speedPhaseBar").style.width = `${pct}%`;
+  if (now >= speedCtx.targetTs) {
+    if (speedCtx.phase === "A") {
+      speedCtx.phase = "B";
+      document.getElementById("speedCard").classList.remove("phase-a");
+      document.getElementById("speedCard").classList.add("phase-b");
+      document.getElementById("speedPhase").textContent = "B";
+      const remainMs = Math.max(500, state.settings.speedAdvanceMs - state.settings.speedFlipMs);
+      speedCtx.targetTs = now + remainMs;
+    } else {
+      finishSpeedCard(speedCtx.marked);
+      return;
+    }
+  }
+  speedCtx.rafId = requestAnimationFrame(speedTick);
+}
+
+function finishSpeedCard(mark) {
+  cancelSpeed();
+  const v = speedCtx.current;
+  if (!v) return;
+  const correct = mark === "known";
+  if (mark) gradeAnswer(v.w, correct);
+  // If unmarked at timeout, do nothing (don't penalize) — passive review
+  if (state.session.active && state.session.stage === "speed") {
+    const ps = state.session.perStage.speed;
+    ps.done++;
+    if (correct) ps.correct++;
+    saveState();
+  }
+  speedCtx.idx++;
+  showSpeedCard();
+}
+
+function cancelSpeed() {
+  if (speedCtx.rafId) cancelAnimationFrame(speedCtx.rafId);
+  speedCtx.rafId = null;
+}
+
+function pauseSpeed() {
+  if (speedCtx.paused) return;
+  speedCtx.paused = true;
+  speedCtx.pausedRemain = Math.max(0, speedCtx.targetTs - performance.now());
+  document.getElementById("speedPause").textContent = "▶";
+}
+function resumeSpeed() {
+  if (!speedCtx.paused) return;
+  speedCtx.paused = false;
+  speedCtx.targetTs = performance.now() + speedCtx.pausedRemain;
+  document.getElementById("speedPause").textContent = "⏸";
+}
+function toggleSpeedPause() { speedCtx.paused ? resumeSpeed() : pauseSpeed(); }
+
+function speedMark(mark) {
+  speedCtx.marked = mark;
+  finishSpeedCard(mark);
+}
+
+// ============ Region: Mode/Grammar ============
+function renderGrammarRef() {
+  const root = document.getElementById("gramRef");
+  root.innerHTML = GRAMMAR.map(g => `
+    <div class="grammar-item">
+      <div class="grammar-title">${escapeHtml(g.title)}</div>
+      <div class="grammar-rule">${escapeHtml(g.rule).replace(/\n/g, "<br>")}</div>
+      <div class="grammar-example">${escapeHtml(g.example)}</div>
+      <div class="grammar-tip">${escapeHtml(g.tip)}</div>
+    </div>
+  `).join("");
+}
+
+const drillCtx = {
+  queue: [],
+  idx: 0,
+  startedAt: 0,
+  timerId: null,
+  locked: false,
+  correct: 0
+};
+
+function renderGrammarDrill() {
+  drillCtx.queue = shuffle(GRAMMAR_DRILL).slice(0, 10);
+  drillCtx.idx = 0;
+  drillCtx.correct = 0;
+  drillCtx.startedAt = Date.now();
+  startDrillTimer();
+  showDrillQ();
+}
+
+function startDrillTimer() {
+  stopDrillTimer();
+  drillCtx.timerId = setInterval(() => {
+    const sec = ((Date.now() - drillCtx.startedAt) / 1000).toFixed(1);
+    const t = document.getElementById("drillTimer");
+    if (t) t.textContent = `⏱ ${sec}s`;
+  }, 100);
+}
+function stopDrillTimer() { if (drillCtx.timerId) { clearInterval(drillCtx.timerId); drillCtx.timerId = null; } }
+
+function showDrillQ() {
+  const explainEl = document.getElementById("drillExplain");
+  explainEl.hidden = true;
+  explainEl.textContent = "";
+  if (drillCtx.idx >= drillCtx.queue.length) {
+    stopDrillTimer();
+    document.getElementById("drillPattern").textContent = "完成";
+    document.getElementById("drillStem").textContent = `成績 ${drillCtx.correct} / ${drillCtx.queue.length}`;
+    document.getElementById("drillOptions").innerHTML = `<button class="drill-opt" onclick="renderGrammarDrill()" style="grid-column: span 2;">再來一輪</button>`;
+    document.getElementById("drillProgress").textContent = `${drillCtx.queue.length} / ${drillCtx.queue.length}`;
+    document.getElementById("drillBar").style.width = "100%";
+    return;
+  }
+  const q = drillCtx.queue[drillCtx.idx];
+  drillCtx.locked = false;
+  document.getElementById("drillPattern").textContent = `Pattern: ${q.pattern}`;
+  document.getElementById("drillStem").textContent = q.q;
+  document.getElementById("drillProgress").textContent = `${drillCtx.idx + 1} / ${drillCtx.queue.length}`;
+  document.getElementById("drillBar").style.width = `${(drillCtx.idx) / drillCtx.queue.length * 100}%`;
+  const opts = shuffle([q.correct, q.wrong]);
+  const cont = document.getElementById("drillOptions");
+  cont.innerHTML = opts.map((o, i) =>
+    `<button class="drill-opt" data-correct="${o === q.correct}">${escapeHtml(o)}</button>`
+  ).join("");
+  cont.querySelectorAll(".drill-opt").forEach(b => b.addEventListener("click", () => onDrillPick(b, q)));
+}
+
+function onDrillPick(btn, q) {
+  if (drillCtx.locked) return;
+  drillCtx.locked = true;
+  const ok = btn.dataset.correct === "true";
+  document.querySelectorAll(".drill-opt").forEach(b => {
+    b.classList.add("disabled");
+    if (b.dataset.correct === "true") b.classList.add("correct");
+  });
+  if (!ok) btn.classList.add("wrong");
+  if (ok) drillCtx.correct++;
+  const explainEl = document.getElementById("drillExplain");
+  explainEl.hidden = false;
+  explainEl.textContent = (ok ? "✓ " : "✗ ") + q.explain;
+  setTimeout(() => { drillCtx.idx++; showDrillQ(); }, ok ? 700 : 1400);
+}
+
+// ============ Region: Mode/Today ============
+const TODAY_STAGES = ["match", "mc", "cloze", "speed"];
+const STAGE_LABELS = { match: "🔗 配對", mc: "⚡ 速選", cloze: "✍️ 填空", speed: "🌊 快閃" };
+
+function renderTodayPanel() {
+  const root = document.getElementById("todayBody");
+  if (!state.session.active) {
+    renderTodayIdle(root);
+  } else if (state.session.stage === "summary") {
+    renderTodaySummary(root);
+  } else {
+    renderTodayRunning(root);
+  }
+}
+
+function renderTodayIdle(root) {
+  const lastLine = state.history.lastFinishedAt
+    ? `上次完成：${new Date(state.history.lastFinishedAt).toLocaleString("zh-TW")} · 已 Known ${state.boxes.known.length} 字`
+    : "尚未完成過任何 session — 開始你的第一輪 ✨";
+  const target = state.settings.batchSize;
+  root.innerHTML = `
+    <div class="today-idle">
+      <div style="font-size:15px; color:#cbd5e1; line-height:1.6;">
+        4 階段串連：配對 → 速選 → 填空 → 快閃<br>
+        每輪約 ${target} 個字 · 預計 7-9 分鐘
+      </div>
+      <button class="big-cta" id="btnStartToday">開始今日 ${target} 字</button>
+      <div class="last-line">${escapeHtml(lastLine)}</div>
+    </div>
+  `;
+  document.getElementById("btnStartToday").addEventListener("click", startSession);
+}
+
+function renderTodayRunning(root) {
+  const stage = state.session.stage;
+  const stageIdx = TODAY_STAGES.indexOf(stage) + 1;
+  root.innerHTML = `
+    <div class="stage-badge">
+      <span>Stage ${stageIdx} / 4 · <span class="stage-name">${STAGE_LABELS[stage] || stage}</span></span>
+      <button class="icon-btn" id="btnBail">Esc 離開</button>
+    </div>
+    <div id="todayStageHost"></div>
+  `;
+  document.getElementById("btnBail").addEventListener("click", endSession);
+  mountStage(stage);
+}
+
+function mountStage(stage) {
+  const host = document.getElementById("todayStageHost");
+  // Clone the standalone panel's inner DOM into the host. Simpler: since the
+  // standalone panel for non-Today modes is hidden, we *temporarily* move its
+  // children into the host. After the stage finishes, we move them back.
+  const sourcePanel = document.getElementById(`panel-${stage}`);
+  const inner = sourcePanel.querySelector(".panel-card");
+  if (!inner) return;
+  host.appendChild(inner); // physically move the card into Today
+  const batch = state.session.batch.map(vocabByWord).filter(Boolean);
+  const onDone = () => {
+    // Move card back to its original panel container
+    sourcePanel.appendChild(inner);
+    advanceStage();
+  };
+  if (stage === "match") {
+    runTodayMatchStages(batch, onDone);
+  } else if (stage === "mc") {
+    renderMC({ batch: state.session.batch, onComplete: onDone });
+  } else if (stage === "cloze") {
+    renderCloze({ batch: state.session.batch, onComplete: onDone });
+    setTimeout(() => document.getElementById("clozeInput")?.focus(), 80);
+  } else if (stage === "speed") {
+    renderSpeed({ batch: state.session.batch, onComplete: onDone });
+  }
+}
+
+function runTodayMatchStages(batch, onAllDone) {
+  // Process batch in groups of matchPairs
+  const size = state.settings.matchPairs;
+  const groups = [];
+  for (let i = 0; i < batch.length; i += size) groups.push(batch.slice(i, i + size));
+  let g = 0;
+  const next = () => {
+    if (g >= groups.length) return onAllDone();
+    const grp = groups[g++];
+    if (grp.length < 2) return next();
+    renderMatch({ batch: grp, embedded: true, onComplete: next });
+  };
+  next();
+}
+
+function startSession() {
+  const batchSize = state.settings.batchSize;
+  // Priority: up to 8 from almost, fill from new, pad from known
+  const fromAlmost = shuffle(state.boxes.almost).slice(0, Math.min(8, batchSize));
+  const remain = batchSize - fromAlmost.length;
+  let fromNew = shuffle(state.boxes.new).slice(0, remain);
+  let combined = [...fromAlmost, ...fromNew];
+  if (combined.length < batchSize) {
+    const pad = shuffle(state.boxes.known).slice(0, batchSize - combined.length);
+    combined = [...combined, ...pad];
+  }
+  if (combined.length < 2) {
+    alert("詞庫太空，請先去其他模式累積一些 almost / new 字！");
+    return;
+  }
+  state.session = {
+    active: true,
+    startedAt: Date.now(),
+    stage: TODAY_STAGES[0],
+    stageIndex: 0,
+    batch: combined,
+    perStage: {
+      match: { done: 0, correct: 0, total: combined.length },
+      mc:    { done: 0, correct: 0, total: combined.length },
+      cloze: { done: 0, correct: 0, total: combined.length },
+      speed: { done: 0, correct: 0, total: combined.length }
+    }
+  };
+  saveStateNow();
+  renderTodayPanel();
+}
+
+function advanceStage() {
+  state.session.stageIndex++;
+  const next = TODAY_STAGES[state.session.stageIndex];
+  if (!next) {
+    finishSession();
+    return;
+  }
+  state.session.stage = next;
+  saveStateNow();
+  renderTodayPanel();
+}
+
+function finishSession() {
+  state.session.stage = "summary";
+  state.history.sessions++;
+  state.history.lastFinishedAt = Date.now();
+  state.history.totalKnownWords = state.boxes.known.length;
+  saveStateNow();
+  renderTodayPanel();
+}
+
+function endSession() {
+  // Bail back without finishing — preserve perStage so resume could happen, but reset active
+  cancelSpeed();
+  stopMatchTimer();
+  stopMCTimer();
+  stopClozeTimer();
+  // Move any moved card back to its panel
+  const host = document.getElementById("todayStageHost");
+  if (host) {
+    for (const stage of ["match", "mc", "cloze", "speed"]) {
+      const moved = host.querySelector(`#panel-${stage}, .panel-card`);
+      // No reliable id-based recovery; just leave whatever child back to its panel via stage lookup:
+    }
+  }
+  // Brute-force: restore each panel's inner card if missing
+  for (const stage of ["match", "mc", "cloze", "speed"]) {
+    const p = document.getElementById(`panel-${stage}`);
+    if (!p.querySelector(".panel-card")) {
+      const orphan = document.querySelector(`#todayStageHost .panel-card`);
+      if (orphan) p.appendChild(orphan);
+    }
+  }
+  state.session.active = false;
+  state.session.stage = null;
+  saveStateNow();
+  renderTodayPanel();
+}
+
+function renderTodaySummary(root) {
+  const ps = state.session.perStage;
+  const totalCorrect = ps.match.correct + ps.mc.correct + ps.cloze.correct + ps.speed.correct;
+  const totalDone    = ps.match.done    + ps.mc.done    + ps.cloze.done    + ps.speed.done;
+  const elapsed = ((Date.now() - state.session.startedAt) / 1000 / 60).toFixed(1);
+  root.innerHTML = `
+    <div class="today-summary">
+      <h2 style="color:#60a5fa; margin-bottom:8px;">Session 完成 ✓</h2>
+      <div style="color:#94a3b8;">總計 ${totalCorrect} / ${totalDone} · ${elapsed} 分鐘</div>
+      <div class="summary-grid">
+        <div class="summary-cell"><div class="num">${ps.match.correct}/${ps.match.total}</div><div class="lbl">🔗 配對</div></div>
+        <div class="summary-cell"><div class="num">${ps.mc.correct}/${ps.mc.total}</div><div class="lbl">⚡ 速選</div></div>
+        <div class="summary-cell"><div class="num">${ps.cloze.correct}/${ps.cloze.total}</div><div class="lbl">✍️ 填空</div></div>
+        <div class="summary-cell"><div class="num">${ps.speed.correct}/${ps.speed.total}</div><div class="lbl">🌊 快閃</div></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:14px;">
+        <button class="big-cta" style="flex:1;" id="btnAgain">再做 ${state.settings.batchSize} 個</button>
+        <button class="icon-btn" style="padding:14px 20px;" id="btnBackIdle">明天再來</button>
+      </div>
+    </div>
+  `;
+  document.getElementById("btnAgain").addEventListener("click", () => {
+    state.session.active = false;
+    startSession();
+  });
+  document.getElementById("btnBackIdle").addEventListener("click", () => {
+    state.session.active = false;
+    state.session.stage = null;
+    saveStateNow();
+    renderTodayPanel();
+  });
+}
+
+// ============ Region: Tabs/Routing ============
+let activeMode = "today";
+
+function switchMode(mode) {
+  activeMode = mode;
+  document.querySelectorAll(".mode-tab").forEach(t => {
+    t.classList.toggle("active", t.dataset.mode === mode);
+  });
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById(`panel-${mode}`).classList.add("active");
+
+  // Cleanup timers from previous mode
+  cancelSpeed();
+  // Don't kill match/mc/cloze timers — they self-clear on render
+
+  if (mode === "today") {
+    renderTodayPanel();
+  } else if (mode === "match") {
+    renderMatch();
+  } else if (mode === "mc") {
+    renderMC();
+  } else if (mode === "cloze") {
+    renderCloze();
+  } else if (mode === "speed") {
+    renderSpeed();
+  } else if (mode === "grammar") {
+    // default to ref subtab
+    selectGramSub("ref");
+  }
+}
+
+function selectGramSub(sub) {
+  document.querySelectorAll(".gram-subtab").forEach(b => b.classList.toggle("active", b.dataset.sub === sub));
+  document.getElementById("gramRef").hidden  = sub !== "ref";
+  document.getElementById("gramDrill").hidden = sub !== "drill";
+  if (sub === "drill") renderGrammarDrill();
+  else renderGrammarRef();
+}
+
+// Global keyboard router
+document.addEventListener("keydown", (e) => {
+  // Esc bails session globally
+  if (e.key === "Escape" && state.session.active && activeMode === "today") {
+    endSession();
+    return;
+  }
+
+  const tag = (e.target && e.target.tagName) || "";
+  const inEditable = tag === "INPUT" || tag === "TEXTAREA";
+  const visibleStage = state.session.active ? state.session.stage : activeMode;
+
+  if (visibleStage === "mc") {
+    if (["1","2","3","4"].includes(e.key)) {
+      const opts = document.querySelectorAll("#mcOptions .mc-opt");
+      const idx = parseInt(e.key, 10) - 1;
+      if (opts[idx]) opts[idx].click();
+    }
+  } else if (visibleStage === "cloze") {
+    // Cloze handled via input listeners
+  } else if (visibleStage === "speed") {
+    if (e.key === " ") { e.preventDefault(); toggleSpeedPause(); }
+    else if (e.key === "ArrowRight") { e.preventDefault(); speedMark("known"); }
+    else if (e.key === "ArrowLeft")  { e.preventDefault(); speedMark("unknown"); }
+  } else if (visibleStage === "grammar" && !document.getElementById("gramDrill").hidden) {
+    if (["1","2"].includes(e.key)) {
+      const opts = document.querySelectorAll("#drillOptions .drill-opt");
+      const idx = parseInt(e.key, 10) - 1;
+      if (opts[idx]) opts[idx].click();
+    }
+  }
+});
+
+// Touch swipe for Speed mode
+function attachSpeedSwipe() {
+  const card = document.getElementById("speedCard");
+  if (!card) return;
+  card.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    speedCtx.touchStartX = t.clientX;
+    speedCtx.touchStartY = t.clientY;
+  }, { passive: true });
+  card.addEventListener("touchend", (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - speedCtx.touchStartX;
+    const dy = t.clientY - speedCtx.touchStartY;
+    if (Math.abs(dx) > 80 && Math.abs(dy) < 40) {
+      if (dx > 0) speedMark("known");
+      else        speedMark("unknown");
+    } else {
+      // Tap = pause toggle
+      toggleSpeedPause();
+    }
+  }, { passive: true });
+}
+
+// ============ Region: Util/Escape ============
+function escapeHtml(s) {
+  return String(s == null ? "" : s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+function escapeAttr(s) { return escapeHtml(s); }
+
+// ============ Region: Settings dialog ============
+function openSettings() {
+  const dlg = document.getElementById("settings");
+  document.getElementById("setMc").value      = state.settings.mcAutoAdvanceMs;
+  document.getElementById("setFlip").value    = state.settings.speedFlipMs;
+  document.getElementById("setAdvance").value = state.settings.speedAdvanceMs;
+  document.getElementById("setBatch").value   = state.settings.batchSize;
+  const filterSel = document.getElementById("setFilter");
+  filterSel.innerHTML = CATEGORIES.map(c => `<option value="${c.id}" ${state.filter === c.id ? "selected" : ""}>${c.name}</option>`).join("");
+  document.getElementById("setDistractor").value = state.settings.distractorMode;
+  if (typeof dlg.showModal === "function") dlg.showModal();
+  else dlg.setAttribute("open", "");
+}
+function closeSettings() {
+  const dlg = document.getElementById("settings");
+  if (typeof dlg.close === "function") dlg.close();
+  else dlg.removeAttribute("open");
+}
+function saveSettings() {
+  const num = (id, def) => {
+    const v = parseInt(document.getElementById(id).value, 10);
+    return Number.isFinite(v) ? v : def;
+  };
+  state.settings.mcAutoAdvanceMs = num("setMc", 600);
+  state.settings.speedFlipMs     = Math.max(1000, num("setFlip", 4000));
+  state.settings.speedAdvanceMs  = Math.max(state.settings.speedFlipMs + 500, num("setAdvance", 8000));
+  state.settings.batchSize       = Math.max(2, num("setBatch", 20));
+  state.filter                   = document.getElementById("setFilter").value;
+  state.settings.distractorMode  = document.getElementById("setDistractor").value;
+  saveStateNow();
+  renderBoxStatus();
+  closeSettings();
+}
+
+// ============ Region: Init ============
+function init() {
+  loadState();
+  renderBoxStatus();
+
+  // Tabs
+  document.querySelectorAll(".mode-tab").forEach(tab => {
+    tab.addEventListener("click", () => switchMode(tab.dataset.mode));
+  });
+  // Settings/Reset
+  document.getElementById("btnSettings").addEventListener("click", openSettings);
+  document.getElementById("btnReset").addEventListener("click", resetProgress);
+  document.getElementById("setSave").addEventListener("click", saveSettings);
+  document.getElementById("setCancel").addEventListener("click", closeSettings);
+
+  // Cloze input listeners
+  const clozeInput = document.getElementById("clozeInput");
+  clozeInput.addEventListener("input", onClozeInput);
+  clozeInput.addEventListener("keydown", onClozeKey);
+
+  // Speed controls
+  document.getElementById("speedPause").addEventListener("click", toggleSpeedPause);
+  document.querySelectorAll('#panel-speed .speed-controls button[data-mark]').forEach(b => {
+    b.addEventListener("click", () => speedMark(b.dataset.mark));
+  });
+  attachSpeedSwipe();
+
+  // Grammar subtabs
+  document.querySelectorAll(".gram-subtab").forEach(b => {
+    b.addEventListener("click", () => selectGramSub(b.dataset.sub));
+  });
+
+  // Initial render
+  renderGrammarRef();
+  switchMode("today");
+}
+
+init();
+</script>
+</body>
+</html>
